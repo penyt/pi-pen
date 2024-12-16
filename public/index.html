@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pi Temperature Monitor</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: Arial, sans-serif;
+            overflow-x: hidden; /* no horizontal scoll bar */
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        #temperature {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        #chartContainer {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            height: auto;
+            aspect-ratio: 16 / 9;
+            margin-bottom: 20px;
+        }
+
+        #chartTitle {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        #timeRangeSelector {
+            position: absolute;
+            top: 40px; 
+            left: calc(100% + 10px); 
+            z-index: 10;
+            padding: 5px;
+        }
+
+        .timeRangeSelectorAbove {
+            position: static;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        @media (max-width: 900px) {
+            #timeRangeSelector {
+                position: static;
+                margin-bottom: 10px;
+                display: block;
+            }
+
+            #chartContainer {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Temperature Monitor</h1>
+    <div id="temperature">Loading temperature data...</div>
+    <div id="chartContainer">
+        <select id="timeRangeSelector">
+            <option value="1">Last 1 minute</option>
+            <option value="10">Last 10 minutes</option>
+            <option value="60">Last 1 hour</option>
+            <option value="360">Last 6 hours</option>
+            <option value="1440">Last 24 hours</option>
+        </select>
+        <div id="chartTitle">CPU Temperature</div>
+        <canvas id="temperatureChart"></canvas>
+    </div>
+
+    <script>
+        const socket = io();
+
+        // set chart
+        const ctx = document.getElementById('temperatureChart').getContext('2d');
+        const temperatureChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'CPU Temperature (°C)',
+                    data: [],
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 2,
+                    fill: false,
+                    tension: 0.1,
+                    spanGaps: false,
+                    pointRadius: 0, // only line, no point
+                    pointHoverRadius: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Time',
+                            padding: { top: 20 } // "time" padding
+                        },
+                        grid: {
+                            drawOnChartArea: true,
+                            drawTicks: false,
+                            borderDash: [4, 4]
+                        },
+                        ticks: {
+                            maxTicksLimit: 20,
+                            padding: 10
+                        }
+                    },
+                    y: {
+                        beginAtZero: true, // start from 0 °C
+                        max: 100,
+                        title: {
+                            display: true,
+                            text: 'Temperature (°C)',
+                            padding: { right: 10 }
+                        },
+                        grid: {
+                            drawOnChartArea: true,
+                            drawTicks: false,
+                            borderDash: [4, 4]
+                        },
+                        ticks: {
+                            padding: 10
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false // no legend
+                    }
+                }
+            }
+        });
+
+        // updating
+        socket.on('temperatureUpdate', (data) => {
+            document.getElementById('temperature').innerText = 'Current Temperature: ' + data.temperature + ' °C';
+            const currentTime = new Date().toLocaleTimeString();
+
+            if (temperatureChart.data.labels.length > 288) {
+                temperatureChart.data.labels.shift();
+                temperatureChart.data.datasets[0].data.shift();
+            }
+
+            temperatureChart.data.labels.push(currentTime);
+            temperatureChart.data.datasets[0].data.push(data.temperature);
+            temperatureChart.update();
+        });
+
+        // time range
+        document.getElementById('timeRangeSelector').addEventListener('change', function () {
+            const selectedValue = parseInt(this.value);
+            updateChart(selectedValue);
+        });
+
+        // updating chart
+        function updateChart(minutes) {
+            fetch('/api/temperature/history')
+                .then(response => response.json())
+                .then(data => {
+                    const now = Date.now();
+                    const filteredData = [];
+                    const labels = [];
+
+                    // set start time
+                    const startTime = now - minutes * 60 * 1000;
+
+                    // update every 5 sec
+                    for (let time = startTime; time <= now; time += 5000) {
+                        const dataPoint = data.find(item => Math.abs(item.time - time) < 2500); // 寬容時間差，找出最接近的數據點
+                        labels.push(new Date(time).toLocaleTimeString());
+
+                        if (dataPoint) {
+                            filteredData.push(dataPoint.temperature);
+                        } else {
+                            filteredData.push(null); // nodata
+                        }
+                    }
+
+                    temperatureChart.data.labels = labels;
+                    temperatureChart.data.datasets[0].data = filteredData;
+                    temperatureChart.update();
+                });
+        }
+    </script>
+</body>
+
+</html>
