@@ -9,7 +9,7 @@ main code:
 **pi-pen**
 ├ [server.js](https://github.com/penyt/pi-pen/blob/main/server.js)  
 └ public  
-$emsp └ [index.html](https://github.com/penyt/pi-pen/blob/main/public/index.html)  
+&emsp; └ [index.html](https://github.com/penyt/pi-pen/blob/main/public/index.html)  
   
 Run `node server.js` in the pi-pen directory, the service will be running on port 5472.  
 
