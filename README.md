@@ -1,5 +1,6 @@
 # pi-pen
 A simple web app monitoring temperature of your raspberry pi.
+<img width="1120" alt="10min-bigscreen" src="https://github.com/user-attachments/assets/318254b7-477a-40db-9d22-3f013fb6c525" />
 
 Docker image still testing...
 
