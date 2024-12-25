@@ -162,7 +162,7 @@
         // updating
         socket.on('temperatureUpdate', (data) => {
             document.getElementById('temperature').innerText = 'Current Temperature: ' + data.temperature + ' °C';
-            const currentTime = new Date().toLocaleTimeString();
+            const currentTime = new Date().toLocaleTimeString('en-US');
 
             if (temperatureChart.data.labels.length > 288) {
                 temperatureChart.data.labels.shift();
