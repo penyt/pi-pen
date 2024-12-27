@@ -69,12 +69,19 @@ io.on('connection', (socket) => {
 //}
 function getCPUTemperature() {
     try {
-        console.log('Attempting to read /sys/class/thermal/thermal_zone0/temp...');
-        const temp = fs.readFileSync('/sys/class/thermal/thermal_zone0/temp', 'utf8');
-        return parseFloat(temp) / 1000; // 轉換為攝氏溫度
+        // 執行 vcgencmd 命令獲取 CPU 溫度
+        const tempOutput = execSync('vcgencmd measure_temp').toString();
+        const tempMatch = tempOutput.match(/temp=([\d.]+)/); // 使用正規表達式抓取溫度數值
+
+        if (tempMatch && tempMatch[1]) {
+            return parseFloat(tempMatch[1]); // 轉換成浮點數並返回
+        } else {
+            console.error('Failed to parse CPU temperature.');
+            return 0; // 若解析失敗，返回一個默認值
+        }
     } catch (error) {
-        console.error('Failed to read CPU temperature:', error.message);
-        return 0;
+        console.error('Error reading CPU temperature:', error.message);
+        return 0; // 如果命令執行失敗，返回一個默認值
     }
 }
 
