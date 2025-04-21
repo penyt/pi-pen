@@ -2,9 +2,33 @@
 A simple web app monitoring temperature of your raspberry pi.
 <img width="1120" alt="10min-bigscreen" src="https://github.com/user-attachments/assets/318254b7-477a-40db-9d22-3f013fb6c525" />
 
-Docker image still testing...
+DEMO: https://pi-pen.penli.quest  
 
-## Usage
+Docker image still testing... 2025/04/21 FINISHED  
+
+## Usage -- Docker Container
+
+docker run:  
+```
+docker run -d --name pi-pen -p 5472:5472 penyt/pi-pen
+```
+
+docker-compose.yml
+```
+services:
+    pi-pen:
+        image: penyt/pi-pen
+        ports:
+            - '5472:5472'
+        container_name: pi-pen
+```
+
+Then use ```docker ps``` to check container  
+
+On your browser, type in http://localhost:5472 to get to your pi-pen monitor of your pi !!  
+
+
+## Usage -- node.js
 main code:  
   
 **pi-pen**  
