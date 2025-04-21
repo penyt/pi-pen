@@ -1,16 +1,17 @@
 {
   "name": "pi-pen",
   "version": "1.0.0",
-  "main": "index.js",
+  "description": "A simple web app monitoring temperature of your raspberry pi. <img width=\"1120\" alt=\"10min-bigscreen\" src=\"https://github.com/user-attachments/assets/318254b7-477a-40db-9d22-3f013fb6c525\" />",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
   "dependencies": {
-    "express": "^4.21.1",
+    "express": "^5.1.0",
     "socket.io": "^4.8.1"
   }
 }

@@ -1,0 +1,6 @@
+services:
+    pi-pen:
+        image: penyt/pi-pen
+        ports:
+            - '5472:5472'
+        container_name: pi-pen
