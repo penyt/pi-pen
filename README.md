@@ -41,7 +41,7 @@ Run `node server.js` in the pi-pen directory, the service will be running on por
 Go to http://localhost:5472 to monitor temperature of you raspberry pi. 
 
 
-## Run it in background
+### Run it in background
 Using [PM2](https://pm2.io/docs/runtime/guide/installation/),  you may run the app in background.  
 
 If there is no PM2 installed, use npm to install(official method)
